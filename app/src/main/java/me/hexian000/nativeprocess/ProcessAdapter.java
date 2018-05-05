@@ -10,41 +10,41 @@ import android.widget.TextView;
 import java.util.List;
 
 public class ProcessAdapter extends ArrayAdapter<NativeProcess> {
-    private LayoutInflater layoutInflater;
+	private LayoutInflater layoutInflater;
 
-    ProcessAdapter(Activity activity, int textViewResourceId,
-                   List<NativeProcess> processList) {
-        super(activity, textViewResourceId, processList);
-        layoutInflater = activity.getLayoutInflater();
-    }
+	ProcessAdapter(Activity activity, int textViewResourceId,
+	               List<NativeProcess> processList) {
+		super(activity, textViewResourceId, processList);
+		layoutInflater = activity.getLayoutInflater();
+	}
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (null == view) {
-            view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false);
-        }
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View view = convertView;
+		if (null == view) {
+			view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false);
+		}
 
-        NativeProcess data = getItem(position);
-        if (null != data) {
-            TextView text1 = view.findViewById(android.R.id.text1);
-            TextView text2 = view.findViewById(android.R.id.text2);
-            text1.setText(data.name);
-            text2.setHint(data.command);
-        }
-        return view;
-    }
+		NativeProcess data = getItem(position);
+		if (null != data) {
+			TextView text1 = view.findViewById(android.R.id.text1);
+			TextView text2 = view.findViewById(android.R.id.text2);
+			text1.setText(data.name);
+			text2.setHint(data.command);
+		}
+		return view;
+	}
 }
 
 class NativeProcess {
-    int pid;
-    String name;
-    String command;
+	int pid;
+	String name;
+	String command;
 
-    NativeProcess(String line) {
-        String[] words = line.split(" ");
-        pid = Integer.parseInt(words[0]);
-        name = words[1];
-        command = words[2];
-    }
+	NativeProcess(String line) {
+		String[] words = line.split(" ");
+		pid = Integer.parseInt(words[0]);
+		name = words[1];
+		command = words[2];
+	}
 }
