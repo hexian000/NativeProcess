@@ -17,14 +17,13 @@ public class System {
 	public static List<ProcessInfo> listProcesses(final String sort) {
 		final List<ProcessInfo> processes = new ArrayList<>();
 		final List<String> lines = Shell.SU.run("ps -A -w -o PID,UID,TIME,PCPU,RSS,NAME,COMMAND -k " + sort);
-		Log.d(LOG_TAG, "lines: " + lines.size());
 		for (String line : lines) {
-			try {
-				Matcher m = linePattern.matcher(line);
-				if (m.find()) {
-					if ("PID".equals(m.group(1))) {
-						continue;
-					}
+			Matcher m = linePattern.matcher(line);
+			if (m.find()) {
+				if ("PID".equals(m.group(1))) {
+					continue;
+				}
+				try {
 					ProcessInfo info = new ProcessInfo();
 					info.pid = Integer.parseInt(m.group(1));
 					info.uid = Integer.parseInt(m.group(2));
@@ -34,12 +33,14 @@ public class System {
 					info.name = m.group(6);
 					info.command = m.group(7);
 					processes.add(info);
-				} else {
-					Log.w(LOG_TAG, "line mismatch: " + line);
+				} catch (NumberFormatException e) {
+					Log.w(LOG_TAG, "NumberFormatException: " + line);
 				}
-			} catch (NumberFormatException ignored) {
+			} else {
+				Log.w(LOG_TAG, "line mismatch: " + line);
 			}
 		}
+		// processes.sort((a, b) -> -Float.compare(a.cpu, b.cpu));
 		return Collections.unmodifiableList(processes);
 	}
 
