@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import static me.hexian000.nativeprocess.NativeProcess.LOG_TAG;
 
 public class System {
-	private static final Pattern linePattern = Pattern.compile("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*$");
+	private static final Pattern linePattern = Pattern.compile("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.+?)\\s*$");
 
 	public static List<ProcessInfo> listProcesses(final String sort) {
 		final List<ProcessInfo> processes = new ArrayList<>();
@@ -21,9 +21,7 @@ public class System {
 		for (String line : lines) {
 			try {
 				Matcher m = linePattern.matcher(line);
-				Log.d(LOG_TAG, "line: " + line);
 				if (m.find()) {
-					Log.d(LOG_TAG, "match: " + m.group());
 					if ("PID".equals(m.group(1))) {
 						continue;
 					}
@@ -36,6 +34,8 @@ public class System {
 					info.name = m.group(6);
 					info.command = m.group(7);
 					processes.add(info);
+				} else {
+					Log.w(LOG_TAG, "line mismatch: " + line);
 				}
 			} catch (NumberFormatException ignored) {
 			}
