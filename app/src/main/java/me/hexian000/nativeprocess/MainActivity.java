@@ -1,6 +1,6 @@
 package me.hexian000.nativeprocess;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -15,13 +15,14 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends Activity {
 	private Handler handler = null;
 	private List<ProcessInfo> processList = null;
 	private AppInfoCache cache = null;
 	private ProcessAdapter listAdapter = null;
 	private ProgressBar listLoading = null;
 	private Timer refreshTimer = null;
+	private boolean firstRefresh = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +34,8 @@ public class MainActivity extends ListActivity {
 		processList = new ArrayList<>();
 		cache = new AppInfoCache(getPackageManager());
 		listAdapter = new ProcessAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
-		setListAdapter(listAdapter);
+		final ListView listView = findViewById(R.id.List);
+		listView.setAdapter(listAdapter);
 	}
 
 	@Override
@@ -46,14 +48,15 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		firstRefresh = true;
+		listLoading.setVisibility(View.VISIBLE);
 		refreshTimer = new Timer();
 		refreshTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				refresh();
 			}
-		}, 0, 10000);
-		refresh();
+		}, 0, 5000);
 	}
 
 	private void refresh() {
@@ -69,12 +72,10 @@ public class MainActivity extends ListActivity {
 			processList.clear();
 			processList.addAll(processes);
 			listAdapter.notifyDataSetChanged();
-			listLoading.setVisibility(View.INVISIBLE);
+			if (firstRefresh) {
+				listLoading.setVisibility(View.INVISIBLE);
+				firstRefresh = false;
+			}
 		});
-	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
 	}
 }

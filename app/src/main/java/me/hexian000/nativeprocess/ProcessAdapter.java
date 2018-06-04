@@ -1,8 +1,7 @@
 package me.hexian000.nativeprocess;
 
 import android.app.Activity;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +15,13 @@ import java.util.Locale;
 
 public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
 	private LayoutInflater layoutInflater;
+	private Drawable defaultIcon;
 
 	ProcessAdapter(Activity activity, int textViewResourceId,
 	               List<ProcessInfo> processList) {
 		super(activity, textViewResourceId, processList);
 		layoutInflater = activity.getLayoutInflater();
+		defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
 	}
 
 	@Override
@@ -40,13 +41,13 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
 				if (info.app != null) {
 					appName.setText(String.format(Locale.getDefault(), "[%d] %s", info.pid, info.app.label));
 					packageName.setText(String.format(Locale.getDefault(),
-							"%s %dKB %f%%", info.command, info.resident, info.cpu));
+							"%s %s %s%%", info.command, NativeProcess.formatSize(info.resident * 1024), NativeProcess.formatDecimal(info.cpu)));
 					iconView.setImageDrawable(info.app.icon);
 				} else {
 					appName.setText(String.format(Locale.getDefault(), "[%d] %s", info.pid, info.name));
 					packageName.setText(String.format(Locale.getDefault(),
-							"%s %dKB %f%%", info.command, info.resident, info.cpu));
-					iconView.setImageDrawable(new ColorDrawable(Color.TRANSPARENT));
+							"%s %s %s%%", info.command, NativeProcess.formatSize(info.resident * 1024), NativeProcess.formatDecimal(info.cpu)));
+					iconView.setImageDrawable(defaultIcon);
 				}
 			}
 		}

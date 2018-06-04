@@ -16,7 +16,7 @@ public class System {
 
 	public static List<ProcessInfo> listProcesses(final String sort) {
 		final List<ProcessInfo> processes = new ArrayList<>();
-		final List<String> lines = Shell.SU.run("ps -A -o PID,UID,TIME,PCPU,RSS,NAME,COMMAND -k " + sort);
+		final List<String> lines = Shell.SU.run("ps -A -w -o PID,UID,TIME,PCPU,RSS,NAME,COMMAND -k " + sort);
 		Log.d(LOG_TAG, "lines: " + lines.size());
 		for (String line : lines) {
 			try {
