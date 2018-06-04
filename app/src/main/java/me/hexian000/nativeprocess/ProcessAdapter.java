@@ -2,6 +2,7 @@ package me.hexian000.nativeprocess;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +25,9 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
 		defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
 	}
 
+	@NonNull
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 		View view = convertView;
 		if (null == view) {
 			view = layoutInflater.inflate(R.layout.snippet_list_row, parent, false);

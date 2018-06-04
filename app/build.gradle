@@ -22,6 +22,7 @@ android {
 }
 
 dependencies {
+    compileOnly 'com.android.support:support-annotations:27.1.1'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 }
