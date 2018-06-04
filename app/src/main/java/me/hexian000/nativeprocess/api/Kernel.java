@@ -1,7 +1,7 @@
 package me.hexian000.nativeprocess.api;
 
 import android.util.Log;
-import eu.chainfire.libsuperuser.Shell;
+import me.hexian000.nativeprocess.NativeProcess;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,12 +11,19 @@ import java.util.regex.Pattern;
 
 import static me.hexian000.nativeprocess.NativeProcess.LOG_TAG;
 
-public class System {
+public class Kernel {
 	private static final Pattern linePattern = Pattern.compile("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.+?)\\s*$");
+
+	private static List<String> run(String command) {
+		if (NativeProcess.RootShell == null) {
+			NativeProcess.RootShell = new RootShell();
+		}
+		return NativeProcess.RootShell.run(command);
+	}
 
 	public static List<ProcessInfo> listProcesses(final String sort) {
 		final List<ProcessInfo> processes = new ArrayList<>();
-		final List<String> lines = Shell.SU.run("ps -A -w -o PID,UID,TIME,PCPU,RSS,NAME,COMMAND -k " + sort);
+		final List<String> lines = run("ps -A -w -o PID,UID,TIME,PCPU,RSS,NAME,COMMAND -k " + sort);
 		for (String line : lines) {
 			Matcher m = linePattern.matcher(line);
 			if (m.find()) {
@@ -40,7 +47,7 @@ public class System {
 				Log.w(LOG_TAG, "line mismatch: " + line);
 			}
 		}
-		// processes.sort((a, b) -> -Float.compare(a.cpu, b.cpu));
+		processes.sort((a, b) -> -Float.compare(a.cpu, b.cpu));
 		return Collections.unmodifiableList(processes);
 	}
 

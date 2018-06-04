@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import me.hexian000.nativeprocess.api.AppInfoCache;
+import me.hexian000.nativeprocess.api.Kernel;
 import me.hexian000.nativeprocess.api.ProcessInfo;
-import me.hexian000.nativeprocess.api.System;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 
 	private void refresh() {
 		cache.refresh();
-		List<ProcessInfo> processes = System.listProcesses(System.ProcessListSort.SORT_CPU_DSC);
+		List<ProcessInfo> processes = Kernel.listProcesses(Kernel.ProcessListSort.SORT_CPU_DSC);
 		for (ProcessInfo info : processes) {
 			info.app = cache.get(info.uid);
 		}
