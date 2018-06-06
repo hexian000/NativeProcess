@@ -47,7 +47,7 @@ public class Kernel {
 				Log.w(LOG_TAG, "line mismatch: " + line);
 			}
 		}
-		processes.sort((a, b) -> -Float.compare(a.cpu, b.cpu));
+		// processes.sort((a, b) -> -Float.compare(a.cpu, b.cpu));
 		return Collections.unmodifiableList(processes);
 	}
 
