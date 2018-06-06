@@ -28,12 +28,11 @@ public class RootShell {
 		}
 		String uuid = UUID.randomUUID().toString();
 		out.println(command);
-		out.println("echo '" + uuid + "'");
+		out.println("echo; echo '" + uuid + "'");
 		out.flush();
 		while (true) {
 			String line = in.nextLine();
-			if (line.endsWith(uuid)) {
-				list.add(line.substring(0, line.length() - uuid.length()));
+			if (line.equals(uuid)) {
 				return list;
 			}
 			list.add(line);
