@@ -3,6 +3,9 @@ package me.hexian000.nativeprocess;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -23,6 +26,7 @@ public class MainActivity extends Activity {
 	private ProgressBar listLoading = null;
 	private Timer refreshTimer = null;
 	private boolean firstRefresh = false;
+	private String sort;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,7 @@ public class MainActivity extends Activity {
 		processList = new ArrayList<>();
 		cache = new AppInfoCache(getPackageManager());
 		listAdapter = new ProcessAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
+		sort = Kernel.ProcessListSort.SORT_CPU_DSC;
 		final ListView listView = findViewById(R.id.List);
 		listView.setAdapter(listAdapter);
 	}
@@ -59,9 +64,33 @@ public class MainActivity extends Activity {
 		}, 0, 5000);
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_sort_by_cpu:
+				sort = Kernel.ProcessListSort.SORT_CPU_DSC;
+				return true;
+			case R.id.menu_sort_by_rss:
+				sort = Kernel.ProcessListSort.SORT_RESIDENT_DSC;
+				return true;
+			case R.id.menu_sort_by_time:
+				sort = Kernel.ProcessListSort.SORT_TIME_DSC;
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+
 	private void refresh() {
 		cache.refresh();
-		List<ProcessInfo> processes = Kernel.listProcesses(Kernel.ProcessListSort.SORT_CPU_DSC);
+		List<ProcessInfo> processes = Kernel.listProcesses(sort);
 		for (ProcessInfo info : processes) {
 			info.app = cache.get(info.uid);
 		}

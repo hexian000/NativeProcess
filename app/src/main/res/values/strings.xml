@@ -6,4 +6,7 @@
     <string name="kernel_process_tag">Kernel</string>
     <string name="process_format">&lt;%s&gt; %s"</string>
     <string name="info_format">TIME:%s RSS:%s CPU:%s%%</string>
+    <string name="action_sort_by_cpu">CPU</string>
+    <string name="action_sort_by_rss">RSS</string>
+    <string name="action_sort_by_time">TIME</string>
 </resources>
