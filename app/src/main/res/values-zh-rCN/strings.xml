@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">本机进程</string>
+    <string name="app_icon">应用图标</string>
+    <string name="kernel_process_tag">内核</string>
+    <string name="app_kill">终止</string>
+    <string name="process_killed">进程%d已被终止</string>
+</resources>

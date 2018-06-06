@@ -3,4 +3,5 @@
     <string name="app_icon">App Icon</string>
     <string name="app_kill">Kill</string>
     <string name="process_killed">Process %d is killed</string>
+    <string name="kernel_process_tag">Kernel</string>
 </resources>
