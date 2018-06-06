@@ -4,4 +4,6 @@
     <string name="app_kill">Kill</string>
     <string name="process_killed">Process %d is killed</string>
     <string name="kernel_process_tag">Kernel</string>
+    <string name="process_format">&lt;%s&gt; %s"</string>
+    <string name="info_format">TIME:%s RSS:%s CPU:%s%%</string>
 </resources>

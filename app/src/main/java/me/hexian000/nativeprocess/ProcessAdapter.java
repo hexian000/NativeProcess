@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
+	private final String processFormat;
+	private final String infoFormat;
+	private final String kernelTag;
 	private LayoutInflater layoutInflater;
 	private Drawable defaultIcon;
-	private String kernelTag;
 
 	ProcessAdapter(Activity activity, int textViewResourceId,
 	               List<ProcessInfo> processList) {
@@ -25,6 +27,8 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
 		layoutInflater = activity.getLayoutInflater();
 		defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
 		kernelTag = activity.getString(R.string.kernel_process_tag);
+		processFormat = activity.getString(R.string.process_format);
+		infoFormat = activity.getString(R.string.info_format);
 	}
 
 	@NonNull
@@ -43,15 +47,15 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
 				ImageView iconView = view.findViewById(R.id.app_icon);
 
 				if (info.app != null) {
-					appName.setText(String.format(Locale.getDefault(), "%s - %s", info.app.label, info.name));
-					packageName.setText(String.format(Locale.getDefault(), "TIME:%s RSS:%s CPU:%s%%",
+					appName.setText(String.format(Locale.getDefault(), processFormat, info.app.label, info.name));
+					packageName.setText(String.format(Locale.getDefault(), infoFormat,
 							info.time,
 							NativeProcess.formatSize(info.resident * 1024),
 							NativeProcess.formatDecimal(info.cpu)));
 					iconView.setImageDrawable(info.app.icon);
 				} else {
-					appName.setText(String.format(Locale.getDefault(), "%s - %s", kernelTag, info.name));
-					packageName.setText(String.format(Locale.getDefault(), "TIME:%s RSS:%s CPU:%s%%",
+					appName.setText(String.format(Locale.getDefault(), processFormat, kernelTag, info.name));
+					packageName.setText(String.format(Locale.getDefault(), infoFormat,
 							info.time,
 							NativeProcess.formatSize(info.resident * 1024),
 							NativeProcess.formatDecimal(info.cpu)));

@@ -5,4 +5,6 @@
     <string name="kernel_process_tag">内核</string>
     <string name="app_kill">终止</string>
     <string name="process_killed">进程%d已被终止</string>
+    <string name="process_format">&lt;%s&gt; %s"</string>
+    <string name="info_format">TIME:%s RSS:%s CPU:%s%%</string>
 </resources>
