@@ -25,6 +25,9 @@ public class Kernel {
 		final List<ProcessInfo> processes = new ArrayList<>();
 		final List<String> lines = run("ps -A -w -o PID,UID,TIME,PCPU,RSS,NAME,COMMAND -k " + sort);
 		for (String line : lines) {
+			if (line.length() < 1) {
+				continue;
+			}
 			Matcher m = linePattern.matcher(line);
 			if (m.find()) {
 				if ("PID".equals(m.group(1))) {
