@@ -41,14 +41,18 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
 				ImageView iconView = view.findViewById(R.id.app_icon);
 
 				if (info.app != null) {
-					appName.setText(String.format(Locale.getDefault(), "[%d] %s", info.pid, info.app.label));
-					packageName.setText(String.format(Locale.getDefault(),
-							"%s %s %s%%", info.command, NativeProcess.formatSize(info.resident * 1024), NativeProcess.formatDecimal(info.cpu)));
+					appName.setText(String.format(Locale.getDefault(), "[%s] %s", info.app.label, info.name));
+					packageName.setText(String.format(Locale.getDefault(), "TIME:%s RES:%s CPU:%s%%",
+							info.time,
+							NativeProcess.formatSize(info.resident * 1024),
+							NativeProcess.formatDecimal(info.cpu)));
 					iconView.setImageDrawable(info.app.icon);
 				} else {
-					appName.setText(String.format(Locale.getDefault(), "[%d] %s", info.pid, info.name));
-					packageName.setText(String.format(Locale.getDefault(),
-							"%s %s %s%%", info.command, NativeProcess.formatSize(info.resident * 1024), NativeProcess.formatDecimal(info.cpu)));
+					appName.setText(String.format(Locale.getDefault(), "%s", info.name));
+					packageName.setText(String.format(Locale.getDefault(), "TIME:%s RES:%s CPU:%s%%",
+							info.time,
+							NativeProcess.formatSize(info.resident * 1024),
+							NativeProcess.formatDecimal(info.cpu)));
 					iconView.setImageDrawable(defaultIcon);
 				}
 			}
