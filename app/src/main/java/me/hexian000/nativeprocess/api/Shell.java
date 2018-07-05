@@ -7,23 +7,23 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
-public class RootShell {
-	private Process su = null;
+public class Shell {
+	private Process shell = null;
 	private PrintStream out = null;
 	private Scanner in = null;
 
-	public RootShell() {
+	public Shell(String command) {
 		try {
-			su = Runtime.getRuntime().exec("su");
-			in = new Scanner(su.getInputStream());
-			out = new PrintStream(su.getOutputStream());
+			shell = Runtime.getRuntime().exec(command);
+			in = new Scanner(shell.getInputStream());
+			out = new PrintStream(shell.getOutputStream());
 		} catch (IOException ignored) {
 		}
 	}
 
 	public List<String> run(String command) {
 		List<String> list = new ArrayList<>();
-		if (su == null || out == null || in == null) {
+		if (shell == null || out == null || in == null) {
 			return list;
 		}
 		String uuid = UUID.randomUUID().toString();
@@ -50,7 +50,7 @@ public class RootShell {
 			in.close();
 			in = null;
 		}
-		su = null;
+		shell = null;
 	}
 
 	@Override

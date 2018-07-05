@@ -15,10 +15,10 @@ public class Kernel {
 	private static final Pattern linePattern = Pattern.compile("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.+?)\\s*$");
 
 	private static List<String> run(String command) {
-		if (NativeProcess.RootShell == null) {
-			NativeProcess.RootShell = new RootShell();
+		if (NativeProcess.SU == null) {
+			NativeProcess.SU = new Shell("su");
 		}
-		return NativeProcess.RootShell.run(command);
+		return NativeProcess.SU.run(command);
 	}
 
 	public static List<ProcessInfo> listProcesses(final String sort) {
