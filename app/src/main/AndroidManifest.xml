@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="me.hexian000.nativeprocess">
 
-    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-
     <application
         android:name=".NativeProcess"
         android:allowBackup="false"
