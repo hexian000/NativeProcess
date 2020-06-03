@@ -77,12 +77,15 @@ public class MainActivity extends Activity {
         switch (item.getItemId()) {
             case R.id.menu_sort_by_cpu:
                 sort = Kernel.ProcessListSort.SORT_CPU_DSC;
+                item.setChecked(true);
                 return true;
             case R.id.menu_sort_by_rss:
                 sort = Kernel.ProcessListSort.SORT_RESIDENT_DSC;
+                item.setChecked(true);
                 return true;
             case R.id.menu_sort_by_time:
                 sort = Kernel.ProcessListSort.SORT_TIME_DSC;
+                item.setChecked(true);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
