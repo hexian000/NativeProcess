@@ -3,7 +3,7 @@
     <string name="app_icon">App Icon</string>
     <string name="app_kill">Kill</string>
     <string name="process_killed">Process %d is killed</string>
-    <string name="status_format" translatable="false">TIME:%s CPU:%3.0f%% RSS:%s</string>
+    <string name="status_format" translatable="false">TIME:%9s CPU:%3.0f%% RSS:%8s</string>
     <string name="uid_format" translatable="false">UID: %d</string>
     <string name="root_tag" translatable="false">[ROOT]</string>
     <string name="action_sort_by_cpu">CPU</string>

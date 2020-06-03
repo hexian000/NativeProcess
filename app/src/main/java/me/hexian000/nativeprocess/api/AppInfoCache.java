@@ -50,6 +50,7 @@ public class AppInfoCache {
         CachedAppInfo info = cache.get(uid);
         if (info == null) {
             info = loadInfo(uid);
+            cache.put(uid, info);
         }
         if (info == null) {
             String name = pm.getNameForUid(uid);

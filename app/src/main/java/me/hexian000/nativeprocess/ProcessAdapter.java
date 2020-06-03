@@ -63,7 +63,7 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
                 statusView.setText(String.format(Locale.getDefault(), statusFormat,
                         info.time,
                         info.cpu,
-                        NativeProcess.formatSize(info.resident * 1024)));
+                        NativeProcess.formatSize(info.resident)));
             }
         }
         return view;
