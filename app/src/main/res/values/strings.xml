@@ -3,9 +3,9 @@
     <string name="app_icon">App Icon</string>
     <string name="app_kill">Kill</string>
     <string name="process_killed">Process %d is killed</string>
-    <string name="kernel_process_tag">Kernel</string>
-    <string name="process_format">&lt;%s&gt; %s"</string>
-    <string name="info_format">TIME:%s RSS:%s CPU:%s%%</string>
+    <string name="status_format" translatable="false">TIME:%s CPU:%3.0f%% RSS:%s</string>
+    <string name="uid_format" translatable="false">UID: %d</string>
+    <string name="root_tag" translatable="false">[ROOT]</string>
     <string name="action_sort_by_cpu">CPU</string>
     <string name="action_sort_by_rss">RSS</string>
     <string name="action_sort_by_time">TIME</string>

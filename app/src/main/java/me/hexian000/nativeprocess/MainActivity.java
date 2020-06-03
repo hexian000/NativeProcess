@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
         processList = new ArrayList<>();
         cache = new AppInfoCache(getPackageManager());
         listAdapter = new ProcessAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
-        sort = Kernel.ProcessListSort.SORT_CPU_DSC;
+        sort = Kernel.ProcessListSort.SORT_RESIDENT_DSC;
         final ListView listView = findViewById(R.id.List);
         listView.setAdapter(listAdapter);
     }
@@ -93,7 +93,6 @@ public class MainActivity extends Activity {
     }
 
     private void refresh() {
-        cache.refresh();
         List<ProcessInfo> processes = Kernel.listProcesses(sort);
         for (ProcessInfo info : processes) {
             info.app = cache.get(info.uid);

@@ -5,10 +5,10 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/menu_sort_by_cpu"
-            android:title="@string/action_sort_by_cpu"
-            android:checked="true" />
+            android:title="@string/action_sort_by_cpu" />
         <item
             android:id="@+id/menu_sort_by_rss"
+            android:checked="true"
             android:title="@string/action_sort_by_rss" />
         <item
             android:id="@+id/menu_sort_by_time"

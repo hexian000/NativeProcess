@@ -17,9 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
-    private final String processFormat;
-    private final String infoFormat;
-    private final String kernelTag;
+    private final String statusFormat, rootTag, uidFormat;
     private LayoutInflater layoutInflater;
     private Drawable defaultIcon;
 
@@ -28,9 +26,9 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
         super(activity, textViewResourceId, processList);
         layoutInflater = activity.getLayoutInflater();
         defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
-        kernelTag = activity.getString(R.string.kernel_process_tag);
-        processFormat = activity.getString(R.string.process_format);
-        infoFormat = activity.getString(R.string.info_format);
+        statusFormat = activity.getString(R.string.status_format);
+        uidFormat = activity.getString(R.string.uid_format);
+        rootTag = activity.getString(R.string.root_tag);
     }
 
     @NonNull
@@ -44,25 +42,28 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
         if (position < getCount()) {
             ProcessInfo info = getItem(position);
             if (null != info) {
-                TextView appName = view.findViewById(R.id.app_name);
-                TextView packageName = view.findViewById(R.id.app_package);
+                TextView userView = view.findViewById(R.id.user);
+                TextView processView = view.findViewById(R.id.process);
+                TextView statusView = view.findViewById(R.id.status);
                 ImageView iconView = view.findViewById(R.id.app_icon);
 
                 if (info.app != null) {
-                    appName.setText(String.format(Locale.getDefault(), processFormat, info.app.label, info.name));
-                    packageName.setText(String.format(Locale.getDefault(), infoFormat,
-                            info.time,
-                            NativeProcess.formatSize(info.resident * 1024),
-                            NativeProcess.formatDecimal(info.cpu)));
+                    userView.setText(info.app.label);
+                    processView.setText(info.name);
                     iconView.setImageDrawable(info.app.icon);
                 } else {
-                    appName.setText(String.format(Locale.getDefault(), processFormat, kernelTag, info.name));
-                    packageName.setText(String.format(Locale.getDefault(), infoFormat,
-                            info.time,
-                            NativeProcess.formatSize(info.resident * 1024),
-                            NativeProcess.formatDecimal(info.cpu)));
+                    if (info.uid != 0) {
+                        userView.setText(String.format(Locale.getDefault(), uidFormat, info.uid));
+                    } else {
+                        userView.setText(rootTag);
+                    }
+                    processView.setText(info.name);
                     iconView.setImageDrawable(defaultIcon);
                 }
+                statusView.setText(String.format(Locale.getDefault(), statusFormat,
+                        info.time,
+                        info.cpu,
+                        NativeProcess.formatSize(info.resident * 1024)));
             }
         }
         return view;

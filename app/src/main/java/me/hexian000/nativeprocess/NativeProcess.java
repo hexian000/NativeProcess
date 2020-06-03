@@ -5,26 +5,32 @@ import android.app.Application;
 import me.hexian000.nativeprocess.api.Shell;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class NativeProcess extends Application {
     public final static String LOG_TAG = "NativeProcess";
-    private final static DecimalFormat prettyFormat = new DecimalFormat("#.##");
     public static Shell SU = null;
 
-    public static String formatDecimal(double decimal) {
-        return prettyFormat.format(decimal);
-    }
-
-    public static String formatSize(double size) {
-        if (size < 2.0 * 1024.0) { // Byte
-            return prettyFormat.format(size) + "B";
-        } else if (size < 2.0 * 1024.0 * 1024.0) { // KB
-            return prettyFormat.format(size / 1024.0) + "KB";
-        } else if (size < 2.0 * 1024.0 * 1024.0 * 1024.0) { // MB
-            return prettyFormat.format(size / 1024.0 / 1024.0) + "MB";
-        } else { // GB
-            return prettyFormat.format(size / 1024.0 / 1024.0 / 1024.0) + "GB";
+    public static String formatSize(long size) {
+        if (size == 0) {
+            return "0";
         }
+        final double n = Math.log(Math.abs(size)) / Math.log(1024.0);
+        final double value = size / Math.pow(1024.0, Math.floor(n));
+        if (n < 1.0) { // Byte
+            return String.format(Locale.getDefault(), "%.0fB", value);
+        }
+        if (n < 2.0) { // KB
+            return String.format(Locale.getDefault(), "%.1fKB", value);
+        }
+        if (n < 3.0) { // MB
+            return String.format(Locale.getDefault(), "%.1fMB", value);
+        }
+        if (n < 4.0) { // GB
+            return String.format(Locale.getDefault(), "%.1fGB", value);
+        }
+        // TB
+        return String.format(Locale.getDefault(), "%.1fTB", value);
     }
 
     @Override

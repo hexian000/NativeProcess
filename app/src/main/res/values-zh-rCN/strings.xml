@@ -2,11 +2,8 @@
 <resources>
     <string name="app_name">本机进程</string>
     <string name="app_icon">应用图标</string>
-    <string name="kernel_process_tag">内核</string>
     <string name="app_kill">终止</string>
     <string name="process_killed">进程%d已被终止</string>
-    <string name="process_format">&lt;%s&gt; %s"</string>
-    <string name="info_format">TIME:%s RSS:%s CPU:%s%%</string>
     <string name="action_sort_by_cpu">CPU</string>
     <string name="action_sort_by_rss">RSS</string>
     <string name="action_sort_by_time">TIME</string>
