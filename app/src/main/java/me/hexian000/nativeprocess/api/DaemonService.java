@@ -3,10 +3,13 @@ package me.hexian000.nativeprocess.api;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
+
+import static me.hexian000.nativeprocess.NativeProcess.TAG;
 
 public class DaemonService extends Service implements Runnable {
     private Daemon daemon;
@@ -16,8 +19,10 @@ public class DaemonService extends Service implements Runnable {
 
     @Override
     public void onDestroy() {
-        daemon.close();
-        daemon = null;
+        if (daemon != null) {
+            daemon.close();
+            daemon = null;
+        }
     }
 
     @Override
@@ -32,6 +37,7 @@ public class DaemonService extends Service implements Runnable {
                 }
                 if (line.startsWith("END")) {
                     sample.freeze();
+                    Log.d(TAG, "sample frozen");
                     final FrameUpdateWatcher watcher = this.watcher;
                     if (watcher != null) {
                         final Frame frame = new Frame();
@@ -62,20 +68,18 @@ public class DaemonService extends Service implements Runnable {
         }
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        daemon = new Daemon("su", getApplicationInfo().nativeLibraryDir + "/libtasks.so");
-        clock_tick = Long.parseLong(daemon.safeReadLine());
-        new Thread(this).start();
-        return super.onStartCommand(intent, flags, startId);
-    }
-
     public DaemonService() {
         mBinder = new Binder();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        if (daemon == null) {
+            daemon = new Daemon("su", getApplicationInfo().nativeLibraryDir + "/libtasks.so");
+            clock_tick = Long.parseLong(daemon.safeReadLine());
+            Log.d(TAG, "clock_tick=" + clock_tick);
+            new Thread(this).start();
+        }
         return mBinder;
     }
 
