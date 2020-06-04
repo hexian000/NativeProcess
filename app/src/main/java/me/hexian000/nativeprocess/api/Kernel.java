@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static me.hexian000.nativeprocess.NativeProcess.LOG_TAG;
+import static me.hexian000.nativeprocess.NativeProcess.TAG;
 
 public class Kernel {
     private static final Pattern linePattern = Pattern.compile("^\\s*(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.+?)\\s*$");
@@ -45,10 +45,10 @@ public class Kernel {
                     info.command = m.group(7);
                     processes.add(info);
                 } catch (NumberFormatException e) {
-                    Log.w(LOG_TAG, "NumberFormatException: " + line);
+                    Log.w(TAG, "NumberFormatException: " + line);
                 }
             } else {
-                Log.w(LOG_TAG, "line mismatch: " + line);
+                Log.w(TAG, "line mismatch: " + line);
             }
         }
         // processes.sort((a, b) -> -Float.compare(a.cpu, b.cpu));

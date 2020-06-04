@@ -1,8 +1,12 @@
 package me.hexian000.nativeprocess;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -11,34 +15,39 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import me.hexian000.nativeprocess.api.AppInfoCache;
+import me.hexian000.nativeprocess.api.DaemonService;
+import me.hexian000.nativeprocess.api.Frame;
+import me.hexian000.nativeprocess.api.FrameUpdateWatcher;
 import me.hexian000.nativeprocess.api.Kernel;
-import me.hexian000.nativeprocess.api.ProcessInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class MainActivity extends Activity {
-    private Handler handler = null;
-    private List<ProcessInfo> processList = null;
-    private AppInfoCache cache = null;
-    private ProcessAdapter listAdapter = null;
+public class MainActivity extends Activity implements FrameUpdateWatcher {
+    private Handler handler = new Handler();
+    private List<Frame.UserStat> processList = null;
+    private UserAdapter listAdapter = null;
     private ProgressBar listLoading = null;
-    private Timer refreshTimer = null;
     private boolean firstRefresh = false;
     private String sort;
+    private ServiceConnection mConnection;
+    private DaemonService.Binder binder;
+    private AppInfoCache cache;
+
+    public AppInfoCache getCache() {
+        return cache;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        listLoading = findViewById(R.id.ListLoading);
-        handler = new Handler();
-        processList = new ArrayList<>();
         cache = new AppInfoCache(getPackageManager());
-        listAdapter = new ProcessAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
+
+        listLoading = findViewById(R.id.ListLoading);
+        processList = new ArrayList<>();
+        listAdapter = new UserAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
         sort = Kernel.ProcessListSort.SORT_RESIDENT_DSC;
         final ListView listView = findViewById(R.id.List);
         listView.setAdapter(listAdapter);
@@ -47,8 +56,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        refreshTimer.cancel();
-        refreshTimer = null;
+        if (binder != null) {
+            binder.unwatch();
+            binder = null;
+        }
+        unbindService(mConnection);
     }
 
     @Override
@@ -56,13 +68,19 @@ public class MainActivity extends Activity {
         super.onResume();
         firstRefresh = true;
         listLoading.setVisibility(View.VISIBLE);
-        refreshTimer = new Timer();
-        refreshTimer.scheduleAtFixedRate(new TimerTask() {
+        mConnection = new ServiceConnection() {
             @Override
-            public void run() {
-                refresh();
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                binder = (DaemonService.Binder) service;
+                binder.watch(MainActivity.this);
             }
-        }, 0, 5000);
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+            }
+        };
+        final Intent intent = new Intent(getApplicationContext(), DaemonService.class);
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 
     @Override
@@ -92,17 +110,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void refresh() {
-        List<ProcessInfo> processes = Kernel.listProcesses(sort);
-        for (ProcessInfo info : processes) {
-            info.app = cache.get(info.uid);
-        }
+    @Override
+    public void OnFrameUpdate(final Frame frame) {
         handler.post(() -> {
-            if (refreshTimer == null) {
-                return;
-            }
             processList.clear();
-            processList.addAll(processes);
+            processList.addAll(frame.data.values());
             listAdapter.notifyDataSetChanged();
             if (firstRefresh) {
                 listLoading.setVisibility(View.INVISIBLE);

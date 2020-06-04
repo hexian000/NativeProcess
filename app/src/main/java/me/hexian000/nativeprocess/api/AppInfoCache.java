@@ -42,6 +42,7 @@ public class AppInfoCache {
         }
         CachedAppInfo info = new CachedAppInfo();
         info.label = label.toString();
+        info.packageName = String.join(";", packages);
         info.icon = icon;
         return info;
     }
@@ -57,6 +58,7 @@ public class AppInfoCache {
             if (name != null) {
                 info = new CachedAppInfo();
                 info.label = name;
+                info.packageName = "";
                 cache.put(uid, info);
             }
         }

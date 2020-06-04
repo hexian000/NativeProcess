@@ -11,19 +11,24 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import me.hexian000.nativeprocess.api.AppInfoCache;
+import me.hexian000.nativeprocess.api.CachedAppInfo;
+import me.hexian000.nativeprocess.api.Frame;
 import me.hexian000.nativeprocess.api.ProcessInfo;
 
 import java.util.List;
 import java.util.Locale;
 
-public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
+public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
     private final String statusFormat, rootTag, uidFormat;
+    private final AppInfoCache cache;
     private LayoutInflater layoutInflater;
     private Drawable defaultIcon;
 
-    ProcessAdapter(Activity activity, int textViewResourceId,
-                   List<ProcessInfo> processList) {
+    UserAdapter(Activity activity, int textViewResourceId,
+                List<Frame.UserStat> processList) {
         super(activity, textViewResourceId, processList);
+        cache = ((MainActivity) activity).getCache();
         layoutInflater = activity.getLayoutInflater();
         defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
         statusFormat = activity.getString(R.string.status_format);
@@ -40,24 +45,26 @@ public class ProcessAdapter extends ArrayAdapter<ProcessInfo> {
         }
 
         if (position < getCount()) {
-            ProcessInfo info = getItem(position);
+            Frame.UserStat info = getItem(position);
             if (null != info) {
                 TextView userView = view.findViewById(R.id.user);
                 TextView processView = view.findViewById(R.id.process);
                 TextView statusView = view.findViewById(R.id.status);
                 ImageView iconView = view.findViewById(R.id.app_icon);
 
-                if (info.app != null) {
-                    userView.setText(info.app.label);
-                    processView.setText(info.name);
-                    iconView.setImageDrawable(info.app.icon);
+                CachedAppInfo app = cache.get(info.uid);
+
+                if (app != null) {
+                    userView.setText(app.label);
+                    processView.setText(app.packageName);
+                    iconView.setImageDrawable(app.icon);
                 } else {
                     if (info.uid != 0) {
                         userView.setText(String.format(Locale.getDefault(), uidFormat, info.uid));
                     } else {
                         userView.setText(rootTag);
                     }
-                    processView.setText(info.name);
+                    processView.setText("");
                     iconView.setImageDrawable(defaultIcon);
                 }
                 statusView.setText(String.format(Locale.getDefault(), statusFormat,

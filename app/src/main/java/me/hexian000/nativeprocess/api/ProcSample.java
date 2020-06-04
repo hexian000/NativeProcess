@@ -3,12 +3,14 @@ package me.hexian000.nativeprocess.api;
 import java.util.Map;
 
 public final class ProcSample {
-    static final class ProcStat {
-        int uid;
-        String name;
-        long time;
-        long resident;
+    public static final class ProcStat {
+        public int uid;
+        public String name;
+        public long time;
+        public long resident;
     }
+
+    public long timestamp;
 
     // pid -> proc
     public Map<Integer, ProcStat> data;
@@ -26,5 +28,9 @@ public final class ProcSample {
         stat.name = tokens[4];
 
         data.put(pid, stat);
+    }
+
+    public void freeze() {
+        timestamp = System.currentTimeMillis();
     }
 }

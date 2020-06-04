@@ -2,41 +2,47 @@ package me.hexian000.nativeprocess.api;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
 public class DaemonService extends Service implements Runnable {
-    private Process shell;
-    private Scanner in;
+    private Daemon daemon;
     private Binder mBinder;
-    private ProcSample sample;
+    private FrameUpdateWatcher watcher;
+    private long clock_tick;
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        in.close();
-        shell.destroy();
-        return false;
+    public void onDestroy() {
+        daemon.close();
+        daemon = null;
     }
 
     @Override
     public void run() {
         try {
+            ProcSample last = null;
             ProcSample sample = new ProcSample();
-            while (in.hasNext()) {
-                String line = in.nextLine();
+            for (Daemon daemon = this.daemon; daemon != null; daemon = this.daemon) {
+                String line = daemon.safeReadLine();
+                if (line == null) {
+                    break;
+                }
                 if (line.startsWith("END")) {
-                    this.sample = sample;
+                    sample.freeze();
+                    final FrameUpdateWatcher watcher = this.watcher;
+                    if (watcher != null) {
+                        final Frame frame = new Frame();
+                        if (last == null) {
+                            frame.fromSample(clock_tick, sample);
+                        } else {
+                            frame.fromSamples(clock_tick, last, sample);
+                        }
+                        watcher.OnFrameUpdate(frame);
+                    }
+                    last = sample;
                     sample = new ProcSample();
                     continue;
                 }
@@ -46,10 +52,22 @@ public class DaemonService extends Service implements Runnable {
         }
     }
 
-    class Binder extends android.os.Binder {
-        public ProcSample getSample() {
-            return DaemonService.this.sample;
+    public class Binder extends android.os.Binder {
+        public void watch(FrameUpdateWatcher watcher) {
+            DaemonService.this.watcher = watcher;
         }
+
+        public void unwatch() {
+            DaemonService.this.watcher = null;
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        daemon = new Daemon("su", getApplicationInfo().nativeLibraryDir + "/libtasks.so");
+        clock_tick = Long.parseLong(daemon.safeReadLine());
+        new Thread(this).start();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     public DaemonService() {
@@ -58,16 +76,6 @@ public class DaemonService extends Service implements Runnable {
 
     @Override
     public IBinder onBind(Intent intent) {
-        try {
-            shell = Runtime.getRuntime().exec("su");
-            in = new Scanner(shell.getInputStream());
-            PrintStream out = new PrintStream(shell.getOutputStream());
-            out.println(getApplicationInfo().nativeLibraryDir + "/libtasks.so");
-            out.flush();
-            out.close();
-        } catch (IOException ignored) {
-        }
-        new Thread(this).start();
         return mBinder;
     }
 
