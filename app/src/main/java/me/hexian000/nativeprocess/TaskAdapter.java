@@ -47,6 +47,7 @@ public class TaskAdapter extends ArrayAdapter<Frame.TaskStat> {
                 TextView statView = view.findViewById(R.id.stat);
 
                 titleView.setText(String.format(Locale.getDefault(), procFormat, stat.pid, stat.name));
+                cmdlineView.setText(stat.cmdline);
                 statView.setText(String.format(Locale.getDefault(), statusFormat,
                         NativeProcess.formatTime(stat.time),
                         stat.cpu,

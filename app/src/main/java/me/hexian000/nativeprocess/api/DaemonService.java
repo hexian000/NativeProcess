@@ -53,7 +53,7 @@ public class DaemonService extends Service implements Runnable {
                     sample = new ProcSample();
                     continue;
                 }
-                sample.add(line);
+                sample.add(line, daemon.safeReadLine());
             }
         } catch (IllegalStateException ignored) {
         }

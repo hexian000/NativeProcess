@@ -20,17 +20,19 @@ long page_size;
 void print_list(DIR *procdir) {
   struct dirent *ent;
   while ((ent = readdir(procdir)) != NULL) {
-    char name[256];
+    char buf[1024];
     pid_t pid = (pid_t) strtol(ent->d_name, NULL, 10);
     if (pid) {
       struct procinfo info;
-      if (read_pid(pid, &info, name, sizeof(name))) {
+      if (read_pid(pid, &info, buf, sizeof(buf))) {
         printf("%d,%u,%s,%lu,%ld,%s\n",
                info.pid, info.uid, getpwuid(info.uid)->pw_name,
                info.time,
                info.resident * page_size,
-               name);
+               buf);
       }
+      size_t n = read_cmdline(pid, buf, sizeof(buf));
+      printf("%*s\n", (int) n, buf);
     }
   }
   printf("END\n");

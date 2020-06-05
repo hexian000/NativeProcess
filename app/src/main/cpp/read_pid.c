@@ -85,3 +85,29 @@ bool read_pid(int pid, struct procinfo *info, char *name, size_t name_len) {
   close(fd);
   return true;
 }
+
+size_t read_cmdline(int pid, char *buf, size_t bufsize) {
+  int fd;
+  snprintf(buf, bufsize, "/proc/%d/cmdline", pid);
+  fd = open(buf, O_RDONLY);
+  if (fd == -1) {
+    return 0;
+  }
+
+  ssize_t nread = read(fd, buf, bufsize - 1);
+  if (nread < 0) {
+    close(fd);
+    return 0;
+  }
+  buf[nread] = '\0';
+  close(fd);
+
+  size_t n = strnlen(buf, nread);
+  for (size_t i = 0; i < n; i++) {
+    char c = buf[i];
+    if (c < 0 || !isprint(c)) {
+      buf[i] = '?';
+    }
+  }
+  return n;
+}

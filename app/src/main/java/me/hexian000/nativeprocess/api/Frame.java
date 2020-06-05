@@ -10,7 +10,7 @@ import java.util.Map;
 public class Frame {
     public static class TaskStat {
         public int pid;
-        public String name;
+        public String name, cmdline;
         public long resident;
         public double time;
         public double cpu;
@@ -41,6 +41,7 @@ public class Frame {
             final TaskStat taskStat = new TaskStat();
             taskStat.pid = entry.getKey();
             taskStat.name = stat.name;
+            taskStat.cmdline = stat.cmdline;
             taskStat.cpu = 0.0;
             taskStat.time = (double) stat.time / (double) clock_tick;
             taskStat.resident = stat.resident;
@@ -71,7 +72,8 @@ public class Frame {
             final TaskStat taskStat = new TaskStat();
             taskStat.pid = entry.getKey();
             taskStat.name = stat.name;
-            taskStat.cpu = (double) (stat.time - lastStat.time) / (double) clock_tick / timepast;
+            taskStat.cmdline = stat.cmdline;
+            taskStat.cpu = (double) (stat.time - lastStat.time) / (double) clock_tick / timepast * 1e+2;
             taskStat.time = (double) stat.time / (double) clock_tick;
             taskStat.resident = stat.resident;
             userStat.uid = stat.uid;

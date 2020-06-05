@@ -12,6 +12,7 @@ public final class ProcSample {
         public int uid;
         public String user;
         public String name;
+        public String cmdline;
         public long time;
         public long resident;
     }
@@ -21,7 +22,7 @@ public final class ProcSample {
     // pid -> proc
     public Map<Integer, ProcStat> data = new HashMap<>();
 
-    public void add(final String line) {
+    public void add(final String line, final String cmdline) {
         Log.d(TAG, "line: \"" + line + "\"");
         String[] tokens = line.split(",", 6);
         if (tokens.length != 6) {
@@ -34,6 +35,7 @@ public final class ProcSample {
         stat.time = Long.parseLong(tokens[3]);
         stat.resident = Long.parseLong(tokens[4]);
         stat.name = tokens[5];
+        stat.cmdline = cmdline;
 
         data.put(pid, stat);
     }
