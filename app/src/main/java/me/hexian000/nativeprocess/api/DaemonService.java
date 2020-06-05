@@ -15,6 +15,7 @@ public class DaemonService extends Service implements Runnable {
     private Daemon daemon;
     private Binder mBinder;
     private FrameUpdateWatcher watcher;
+    private Frame frame;
     private long clock_tick;
 
     @Override
@@ -37,7 +38,6 @@ public class DaemonService extends Service implements Runnable {
                 }
                 if (line.startsWith("END")) {
                     sample.freeze();
-                    Log.d(TAG, "sample frozen");
                     final FrameUpdateWatcher watcher = this.watcher;
                     if (watcher != null) {
                         final Frame frame = new Frame();
@@ -47,6 +47,7 @@ public class DaemonService extends Service implements Runnable {
                             frame.fromSamples(clock_tick, last, sample);
                         }
                         watcher.OnFrameUpdate(frame);
+                        this.frame = frame;
                     }
                     last = sample;
                     sample = new ProcSample();
@@ -61,6 +62,9 @@ public class DaemonService extends Service implements Runnable {
     public class Binder extends android.os.Binder {
         public void watch(FrameUpdateWatcher watcher) {
             DaemonService.this.watcher = watcher;
+            if (frame != null) {
+                watcher.OnFrameUpdate(frame);
+            }
         }
 
         public void unwatch() {

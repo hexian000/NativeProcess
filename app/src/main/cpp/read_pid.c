@@ -10,16 +10,46 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+static inline char *find_name(char *stat_line, char *buf, size_t bufsize) {
+  char *begin = strchr(stat_line, '(');
+  if (begin == NULL) {
+    return NULL;
+  }
+  char *end = strrchr(stat_line, ')');
+  if (end == NULL) {
+    return NULL;
+  }
+
+  if ((size_t) (end - begin) > bufsize) {
+    return NULL;
+  }
+
+  size_t count = 0;
+  for (char *p = begin + 1; p < end; p++) {
+    char c = *p;
+    if (c < 0 || !isprint(c)) {
+      c = '?';
+    }
+    buf[count++] = c;
+    if (count >= bufsize) {
+      return NULL;
+    }
+  }
+  buf[count] = '\0';
+  return end + 1;
+}
+
 bool read_pid(int pid, struct procinfo *info, char *name, size_t name_len) {
   info->pid = pid;
   int fd;
   char buf[1024];
-  snprintf(buf, sizeof(buf), "/proc/%d/stat", pid);
+  snprintf(buf, sizeof(buf), "/proc/%d", pid);
   struct stat statbuf;
   if (stat(buf, &statbuf)) {
     return false;
   }
   info->uid = statbuf.st_uid;
+  snprintf(buf, sizeof(buf), "/proc/%d/stat", pid);
   fd = open(buf, O_RDONLY);
   if (fd == -1) {
     return false;
@@ -31,11 +61,17 @@ bool read_pid(int pid, struct procinfo *info, char *name, size_t name_len) {
     return false;
   }
   buf[nread] = '\0';
+  close(fd);
+
+  char *p = find_name(buf, name, name_len);
+  if (!p) {
+    return false;
+  }
 
   unsigned long utime, stime;
   long rss;
-  if (sscanf(buf,
-             "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*d %*d %*d %*d %*d %*d %*u %*u %ld",
+  if (sscanf(p,
+             " %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*d %*d %*d %*d %*d %*d %*u %*u %ld",
              &utime,
              &stime,
              &rss) != 3) {
@@ -45,27 +81,6 @@ bool read_pid(int pid, struct procinfo *info, char *name, size_t name_len) {
 
   info->time = utime + stime;
   info->resident = rss;
-
-  close(fd);
-  snprintf(buf, sizeof(buf), "/proc/%d/cmdline", pid);
-  fd = open(buf, O_RDONLY);
-  if (fd == -1) {
-    return false;
-  }
-
-  nread = read(fd, name, name_len - 1);
-  if (nread < 0) {
-    close(fd);
-    return false;
-  }
-  name[nread] = '\0';
-
-  const size_t n = strnlen(name, name_len);
-  for (size_t i = 0; i < n; i++) {
-    if (!isprint(name[i])) {
-      name[i] = '?';
-    }
-  }
 
   close(fd);
   return true;

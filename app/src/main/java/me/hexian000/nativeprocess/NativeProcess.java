@@ -7,6 +7,13 @@ import java.util.Locale;
 public class NativeProcess extends Application {
     public final static String TAG = "NativeProcess";
 
+    public static String formatTime(double seconds) {
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d",
+                ((int) Math.floor(seconds / 3600.0)),
+                ((int) Math.floor(seconds / 60.0)) % 60,
+                ((int) Math.floor(seconds)) % 60);
+    }
+
     public static String formatSize(long size) {
         if (size == 0) {
             return "0";

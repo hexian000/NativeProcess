@@ -16,6 +16,8 @@ public class Daemon {
     private InputStream in = null;
 
     public Daemon(final String shell, final String daemon) {
+        buf.position(0);
+        buf.limit(0);
         try {
             process = new ProcessBuilder(shell).start();
             in = process.getInputStream();
@@ -42,9 +44,6 @@ public class Daemon {
         while (buf.remaining() > 0) {
             final int position = buf.position();
             final int read = in.read(buf.array(), position, buf.remaining());
-            if(read<0){
-
-            }
             buf.position(position + read);
             for (int i = position; i < buf.position(); i++) {
                 if (buf.get(i) == '\n') {
@@ -74,7 +73,8 @@ public class Daemon {
         final String ret;
         if (linePos < 0) {
             ret = new String(buf.array(), buf.position(), buf.remaining());
-            buf.clear();
+            buf.position(0);
+            buf.limit(0);
         } else {
             ret = new String(buf.array(), buf.position(), linePos - buf.position());
             buf.position(linePos + 1);

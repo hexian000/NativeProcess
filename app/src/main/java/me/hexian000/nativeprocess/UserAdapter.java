@@ -14,13 +14,12 @@ import androidx.annotation.NonNull;
 import me.hexian000.nativeprocess.api.AppInfoCache;
 import me.hexian000.nativeprocess.api.CachedAppInfo;
 import me.hexian000.nativeprocess.api.Frame;
-import me.hexian000.nativeprocess.api.ProcessInfo;
 
 import java.util.List;
 import java.util.Locale;
 
 public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
-    private final String statusFormat, rootTag, uidFormat;
+    private final String statusFormat, uidFormat;
     private final AppInfoCache cache;
     private LayoutInflater layoutInflater;
     private Drawable defaultIcon;
@@ -33,7 +32,6 @@ public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
         defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
         statusFormat = activity.getString(R.string.status_format);
         uidFormat = activity.getString(R.string.uid_format);
-        rootTag = activity.getString(R.string.root_tag);
     }
 
     @NonNull
@@ -41,7 +39,7 @@ public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View view = convertView;
         if (null == view) {
-            view = layoutInflater.inflate(R.layout.snippet_list_row, parent, false);
+            view = layoutInflater.inflate(R.layout.user_list_row, parent, false);
         }
 
         if (position < getCount()) {
@@ -59,16 +57,12 @@ public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
                     processView.setText(app.packageName);
                     iconView.setImageDrawable(app.icon);
                 } else {
-                    if (info.uid != 0) {
-                        userView.setText(String.format(Locale.getDefault(), uidFormat, info.uid));
-                    } else {
-                        userView.setText(rootTag);
-                    }
-                    processView.setText("");
+                    userView.setText(info.user);
+                    processView.setText(String.format(Locale.getDefault(), uidFormat, info.uid));
                     iconView.setImageDrawable(defaultIcon);
                 }
                 statusView.setText(String.format(Locale.getDefault(), statusFormat,
-                        info.time,
+                        NativeProcess.formatTime(info.time),
                         info.cpu,
                         NativeProcess.formatSize(info.resident)));
             }

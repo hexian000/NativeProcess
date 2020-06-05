@@ -15,6 +15,7 @@ import android.widget.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import me.hexian000.nativeprocess.api.AppInfoCache;
 import me.hexian000.nativeprocess.api.CachedAppInfo;
@@ -24,19 +25,19 @@ import me.hexian000.nativeprocess.api.FrameUpdateWatcher;
 import me.hexian000.nativeprocess.api.ProcSample;
 
 public class AppActivity extends ListActivity implements FrameUpdateWatcher {
+    private Handler handler = new Handler();
     private ImageView imageView = null;
     private TextView textView = null;
     private TextView textHint = null;
     private ProgressBar progressBar = null;
     private Button killButton = null;
-    private Handler handler = null;
 
-    private List<ProcSample.ProcStat> processList = null;
+    private List<Frame.TaskStat> processList = null;
     private TaskAdapter adapter = null;
 
     private ServiceConnection mConnection;
     private DaemonService.Binder binder;
-    private int uid;
+    private int uid, sort;
 
     @Override
     protected void onResume() {
@@ -69,8 +70,14 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
         setContentView(R.layout.activity_app);
 
         Intent intent = getIntent();
-        uid = intent.getIntExtra("uid", 0);
-        if (uid == 0) {
+        uid = intent.getIntExtra("uid", -1);
+        if (uid < 0) {
+            finish();
+            return;
+        }
+
+        sort = intent.getIntExtra("sort", -1);
+        if (!ListSort.isValid(sort)) {
             finish();
             return;
         }
@@ -81,7 +88,7 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
         progressBar = findViewById(R.id.ListLoading);
         killButton = findViewById(R.id.killButton);
         getListView().setOnItemClickListener((parent, view, position, id) -> {
-            ProcSample.ProcStat item = ((TaskAdapter) getListAdapter()).getItem(position);
+            Frame.TaskStat item = ((TaskAdapter) getListAdapter()).getItem(position);
             if (item != null) {
             	/*
                 Shell.SU.run(new String[]{
@@ -116,17 +123,42 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
     @Override
     public void OnFrameUpdate(Frame frame) {
         handler.post(() -> {
-            CachedAppInfo info = new AppInfoCache(getPackageManager()).get(uid);
             processList.clear();
             Frame.UserStat userStat = frame.data.get(uid);
-            if (userStat != null) {
-                processList.addAll(userStat.detail);
+            if (userStat == null) {
+                finish();
+                return;
+            }
+            processList.addAll(userStat.detail);
+            processList.sort((o1, o2) -> {
+                switch (sort) {
+                    case ListSort.rss:
+                        return (int) Math.signum(o2.resident - o1.resident);
+                    case ListSort.cpu:
+                        return (int) Math.signum(o2.cpu - o1.cpu);
+                    case ListSort.time:
+                        return (int) Math.signum(o2.time - o1.time);
+                }
+                return 0;
+            });
+            CachedAppInfo info = new AppInfoCache(getPackageManager()).get(uid);
+            if (info != null) {
+                setTitle(info.label);
+                imageView.setImageDrawable(info.icon);
+                textView.setText(info.label);
+                textHint.setHint(info.packageName);
+                killButton.setVisibility(View.VISIBLE);
+            } else {
+                setTitle(userStat.user);
+                imageView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
+                textView.setText(userStat.user);
+                textHint.setHint(String.format(Locale.getDefault(), getString(R.string.status_format),
+                        NativeProcess.formatTime(userStat.time),
+                        userStat.cpu,
+                        NativeProcess.formatSize(userStat.resident)));
+                killButton.setVisibility(View.INVISIBLE);
             }
             progressBar.setVisibility(View.INVISIBLE);
-            imageView.setImageDrawable(info.icon);
-            textView.setText(info.label);
-            textHint.setHint(info.packageName);
-            killButton.setVisibility(View.VISIBLE);
             adapter.notifyDataSetChanged();
         });
     }

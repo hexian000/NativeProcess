@@ -23,12 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements FrameUpdateWatcher {
-    class UserListSort {
-        public static final int rss = 0;
-        public static final int cpu = 1;
-        public static final int time = 2;
-    }
-
     private Handler handler = new Handler();
     private List<Frame.UserStat> processList = null;
     private UserAdapter listAdapter = null;
@@ -52,10 +46,20 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
 
         listLoading = findViewById(R.id.ListLoading);
         processList = new ArrayList<>();
-        listAdapter = new UserAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
-        sort = UserListSort.rss;
+        listAdapter = new UserAdapter(MainActivity.this, R.layout.user_list_row, processList);
+        sort = ListSort.rss;
         final ListView listView = findViewById(R.id.List);
         listView.setAdapter(listAdapter);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Frame.UserStat info = listAdapter.getItem(position);
+            if (info == null) {
+                return;
+            }
+            final Intent intent = new Intent(getApplicationContext(), AppActivity.class);
+            intent.putExtra("uid", info.uid);
+            intent.putExtra("sort", sort);
+            startActivity(intent);
+        });
     }
 
     @Override
@@ -99,15 +103,15 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sort_by_cpu:
-                sort = UserListSort.cpu;
+                sort = ListSort.cpu;
                 item.setChecked(true);
                 return true;
             case R.id.menu_sort_by_rss:
-                sort = UserListSort.rss;
+                sort = ListSort.rss;
                 item.setChecked(true);
                 return true;
             case R.id.menu_sort_by_time:
-                sort = UserListSort.time;
+                sort = ListSort.time;
                 item.setChecked(true);
                 return true;
             default:
@@ -120,6 +124,17 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
         handler.post(() -> {
             processList.clear();
             processList.addAll(frame.data.values());
+            processList.sort((o1, o2) -> {
+                switch (sort) {
+                    case ListSort.rss:
+                        return (int) Math.signum(o2.resident - o1.resident);
+                    case ListSort.cpu:
+                        return (int) Math.signum(o2.cpu - o1.cpu);
+                    case ListSort.time:
+                        return (int) Math.signum(o2.time - o1.time);
+                }
+                return 0;
+            });
             listAdapter.notifyDataSetChanged();
             if (firstRefresh) {
                 listLoading.setVisibility(View.INVISIBLE);

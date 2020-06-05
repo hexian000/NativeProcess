@@ -8,12 +8,21 @@ import java.util.List;
 import java.util.Map;
 
 public class Frame {
+    public static class TaskStat {
+        public int pid;
+        public String name;
+        public long resident;
+        public double time;
+        public double cpu;
+    }
+
     public static class UserStat {
         public int uid;
         public long resident;
         public double time;
         public double cpu;
-        public List<ProcSample.ProcStat> detail;
+        public String user;
+        public List<TaskStat> detail;
     }
 
     public Map<Integer, UserStat> data;
@@ -25,14 +34,21 @@ public class Frame {
             UserStat userStat = data.get(stat.uid);
             if (userStat == null) {
                 userStat = new UserStat();
+                userStat.user = stat.user;
                 userStat.detail = new ArrayList<>();
                 data.put(stat.uid, userStat);
             }
+            final TaskStat taskStat = new TaskStat();
+            taskStat.pid = entry.getKey();
+            taskStat.name = stat.name;
+            taskStat.cpu = 0.0;
+            taskStat.time = (double) stat.time / (double) clock_tick;
+            taskStat.resident = stat.resident;
             userStat.uid = stat.uid;
-            userStat.cpu = 0.0;
-            userStat.time += (double) stat.time / (double) clock_tick;
-            userStat.resident += stat.resident;
-            userStat.detail.add(stat);
+            userStat.cpu += taskStat.cpu;
+            userStat.time += taskStat.time;
+            userStat.resident += taskStat.resident;
+            userStat.detail.add(taskStat);
         }
     }
 
@@ -48,14 +64,21 @@ public class Frame {
             UserStat userStat = data.get(stat.uid);
             if (userStat == null) {
                 userStat = new UserStat();
+                userStat.user = stat.user;
                 userStat.detail = new ArrayList<>();
                 data.put(stat.uid, userStat);
             }
+            final TaskStat taskStat = new TaskStat();
+            taskStat.pid = entry.getKey();
+            taskStat.name = stat.name;
+            taskStat.cpu = (double) (stat.time - lastStat.time) / (double) clock_tick / timepast;
+            taskStat.time = (double) stat.time / (double) clock_tick;
+            taskStat.resident = stat.resident;
             userStat.uid = stat.uid;
-            userStat.cpu += (double) (stat.time - lastStat.time) / (double) clock_tick / timepast;
-            userStat.time += (double) stat.time / (double) clock_tick;
+            userStat.cpu += taskStat.cpu;
+            userStat.time += taskStat.time;
             userStat.resident += stat.resident;
-            userStat.detail.add(stat);
+            userStat.detail.add(taskStat);
         }
     }
 }
