@@ -18,18 +18,23 @@ import me.hexian000.nativeprocess.api.AppInfoCache;
 import me.hexian000.nativeprocess.api.DaemonService;
 import me.hexian000.nativeprocess.api.Frame;
 import me.hexian000.nativeprocess.api.FrameUpdateWatcher;
-import me.hexian000.nativeprocess.api.Kernel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements FrameUpdateWatcher {
+    class UserListSort {
+        public static final int rss = 0;
+        public static final int cpu = 1;
+        public static final int time = 2;
+    }
+
     private Handler handler = new Handler();
     private List<Frame.UserStat> processList = null;
     private UserAdapter listAdapter = null;
     private ProgressBar listLoading = null;
     private boolean firstRefresh = false;
-    private String sort;
+    private int sort;
     private ServiceConnection mConnection;
     private DaemonService.Binder binder;
     private AppInfoCache cache;
@@ -48,7 +53,7 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
         listLoading = findViewById(R.id.ListLoading);
         processList = new ArrayList<>();
         listAdapter = new UserAdapter(MainActivity.this, R.layout.snippet_list_row, processList);
-        sort = Kernel.ProcessListSort.SORT_RESIDENT_DSC;
+        sort = UserListSort.rss;
         final ListView listView = findViewById(R.id.List);
         listView.setAdapter(listAdapter);
     }
@@ -94,15 +99,15 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sort_by_cpu:
-                sort = Kernel.ProcessListSort.SORT_CPU_DSC;
+                sort = UserListSort.cpu;
                 item.setChecked(true);
                 return true;
             case R.id.menu_sort_by_rss:
-                sort = Kernel.ProcessListSort.SORT_RESIDENT_DSC;
+                sort = UserListSort.rss;
                 item.setChecked(true);
                 return true;
             case R.id.menu_sort_by_time:
-                sort = Kernel.ProcessListSort.SORT_TIME_DSC;
+                sort = UserListSort.time;
                 item.setChecked(true);
                 return true;
             default:

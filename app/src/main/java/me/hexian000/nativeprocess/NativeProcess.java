@@ -2,14 +2,10 @@ package me.hexian000.nativeprocess;
 
 import android.app.Application;
 
-import me.hexian000.nativeprocess.api.Shell;
-
-import java.text.DecimalFormat;
 import java.util.Locale;
 
 public class NativeProcess extends Application {
     public final static String TAG = "NativeProcess";
-    public static Shell SU = null;
 
     public static String formatSize(long size) {
         if (size == 0) {
@@ -28,13 +24,5 @@ public class NativeProcess extends Application {
         }
         // TB
         return String.format(Locale.getDefault(), "%.1fTB", value);
-    }
-
-    @Override
-    public void onTerminate() {
-        if (SU != null) {
-            SU.close();
-        }
-        super.onTerminate();
     }
 }

@@ -38,19 +38,22 @@ public class Daemon {
         return null;
     }
 
-    private int readLineInternal() throws IOException {
-        while (buf.capacity() - buf.limit() > 0) {
-            final int start = buf.limit();
-            final int read = in.read(buf.array(), buf.limit(), buf.capacity() - buf.limit());
-            buf.limit(buf.limit() + read);
-            for (int i = start; i < buf.limit(); i++) {
+    private int readStream() throws IOException {
+        while (buf.remaining() > 0) {
+            final int position = buf.position();
+            final int read = in.read(buf.array(), position, buf.remaining());
+            if(read<0){
+
+            }
+            buf.position(position + read);
+            for (int i = position; i < buf.position(); i++) {
                 if (buf.get(i) == '\n') {
                     return i;
                 }
             }
         }
-        // cut it down
-        return buf.limit() - 1;
+        Log.e(TAG, "readLine buffer overflow");
+        return -1;
     }
 
     private String readLine() throws IOException {
@@ -66,10 +69,16 @@ public class Daemon {
         }
 
         buf.compact();
+        final int linePos = readStream();
         buf.flip();
-        final int linePos = readLineInternal();
-        final String ret = new String(buf.array(), buf.position(), linePos - buf.position());
-        buf.position(linePos + 1);
+        final String ret;
+        if (linePos < 0) {
+            ret = new String(buf.array(), buf.position(), buf.remaining());
+            buf.clear();
+        } else {
+            ret = new String(buf.array(), buf.position(), linePos - buf.position());
+            buf.position(linePos + 1);
+        }
         return ret;
     }
 

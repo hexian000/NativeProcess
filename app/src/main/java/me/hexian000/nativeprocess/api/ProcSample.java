@@ -1,5 +1,6 @@
 package me.hexian000.nativeprocess.api;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public final class ProcSample {
@@ -13,7 +14,7 @@ public final class ProcSample {
     public long timestamp;
 
     // pid -> proc
-    public Map<Integer, ProcStat> data;
+    public Map<Integer, ProcStat> data = new HashMap<>();
 
     public void add(final String line) {
         String[] tokens = line.split(",", 5);

@@ -60,7 +60,8 @@ bool read_pid(int pid, struct procinfo *info, char *name, size_t name_len) {
   }
   name[nread] = '\0';
 
-  for (size_t i = 0; i < (size_t) nread; i++) {
+  const size_t n = strnlen(name, name_len);
+  for (size_t i = 0; i < n; i++) {
     if (!isprint(name[i])) {
       name[i] = '?';
     }
