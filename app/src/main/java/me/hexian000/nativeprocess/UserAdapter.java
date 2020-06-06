@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 
 import me.hexian000.nativeprocess.api.AppInfoCache;
 import me.hexian000.nativeprocess.api.CachedAppInfo;
+import me.hexian000.nativeprocess.api.DaemonService;
 import me.hexian000.nativeprocess.api.Frame;
 
 import java.util.List;
@@ -21,14 +22,14 @@ import java.util.Locale;
 public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
     private final int textViewResourceId;
     private final String statusFormat, uidFormat;
-    private final AppInfoCache cache;
+    private final MainActivity activity;
     private LayoutInflater layoutInflater;
     private Drawable defaultIcon;
 
     UserAdapter(Activity activity, int textViewResourceId, List<Frame.UserStat> processList) {
         super(activity, textViewResourceId, processList);
         this.textViewResourceId = textViewResourceId;
-        cache = ((MainActivity) activity).getCache();
+        this.activity = (MainActivity) activity;
         layoutInflater = activity.getLayoutInflater();
         defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
         statusFormat = activity.getString(R.string.status_format);
@@ -41,7 +42,7 @@ public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
         final TextView statusView = view.findViewById(R.id.status);
         final ImageView iconView = view.findViewById(R.id.app_icon);
 
-        CachedAppInfo app = cache.get(info.uid);
+        CachedAppInfo app = activity.getCache().get(info.uid);
 
         if (app != null) {
             userView.setText(app.label);

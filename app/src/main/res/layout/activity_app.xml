@@ -31,7 +31,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/imageView"
-            android:layout_toStartOf="@id/killButton"
             android:layout_toEndOf="@id/imageView" />
 
         <TextView
@@ -40,17 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textView"
             android:layout_alignStart="@+id/textView"
-            android:layout_toStartOf="@id/killButton"
             android:fontFamily="monospace" />
-
-        <Button
-            android:id="@+id/killButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:text="@string/app_kill"
-            android:visibility="invisible" />
 
     </RelativeLayout>
 

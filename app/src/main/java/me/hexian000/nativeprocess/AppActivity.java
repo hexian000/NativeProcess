@@ -30,7 +30,6 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
     private TextView textView = null;
     private TextView textHint = null;
     private ProgressBar progressBar = null;
-    private Button killButton = null;
     String statusFormat;
     String uidFormat;
 
@@ -95,7 +94,6 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
         textView = findViewById(R.id.textView);
         textHint = findViewById(R.id.textHint);
         progressBar = findViewById(R.id.ListLoading);
-        killButton = findViewById(R.id.killButton);
         getListView().setOnItemClickListener((parent, view, position, id) -> {
             Frame.TaskStat item = ((TaskAdapter) getListAdapter()).getItem(position);
             if (item != null) {
@@ -111,18 +109,6 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
                 startRefreshTimer();*/
             }
         });
-        killButton.setOnClickListener((v) -> {
-            killButton.setEnabled(false);
-            progressBar.setVisibility(View.VISIBLE);
-            new Thread(() -> {
-                /*Shell.SU.run(new String[]{
-                        "ps -u " + info.uid + " -o PID | grep -o -E \"[0-9]+\" | xargs -r kill -15",
-                        "sleep 1",
-                        "ps -u " + info.uid + " -o PID | grep -o -E \"[0-9]+\" | xargs -r kill -9"});*/
-                handler.post(AppActivity.this::finish);
-            }).start();
-        });
-
         processList = new ArrayList<>();
         adapter = new TaskAdapter(AppActivity.this, R.layout.task_list_row, processList);
         setListAdapter(adapter);
@@ -158,7 +144,6 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
                         NativeProcess.formatTime(userStat.time),
                         userStat.cpu,
                         NativeProcess.formatSize(userStat.resident)));
-                // killButton.setVisibility(View.VISIBLE);
             } else {
                 imageView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
                 textView.setText(String.format(Locale.getDefault(), uidFormat, userStat.uid));
@@ -166,7 +151,6 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
                         NativeProcess.formatTime(userStat.time),
                         userStat.cpu,
                         NativeProcess.formatSize(userStat.resident)));
-                killButton.setVisibility(View.INVISIBLE);
             }
             progressBar.setVisibility(View.INVISIBLE);
             adapter.notifyDataSetChanged();
