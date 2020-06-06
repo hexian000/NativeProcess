@@ -31,6 +31,8 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
     private TextView textHint = null;
     private ProgressBar progressBar = null;
     private Button killButton = null;
+    String statusFormat;
+    String uidFormat;
 
     private List<Frame.TaskStat> processList = null;
     private TaskAdapter adapter = null;
@@ -40,8 +42,9 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
     private int uid, sort;
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
+        progressBar.setVisibility(View.VISIBLE);
         mConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName className, IBinder service) {
@@ -58,9 +61,12 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
+    protected void onStop() {
+        super.onStop();
+        if (binder != null) {
+            binder.unwatch(this);
+            binder = null;
+        }
         unbindService(mConnection);
     }
 
@@ -81,6 +87,9 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
             finish();
             return;
         }
+
+        statusFormat = getString(R.string.status_format);
+        uidFormat = getString(R.string.uid_format);
 
         imageView = findViewById(R.id.imageView);
         textView = findViewById(R.id.textView);
@@ -115,8 +124,7 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
         });
 
         processList = new ArrayList<>();
-        adapter = new TaskAdapter(AppActivity.this,
-                android.R.layout.two_line_list_item, processList);
+        adapter = new TaskAdapter(AppActivity.this, R.layout.task_list_row, processList);
         setListAdapter(adapter);
     }
 
@@ -141,18 +149,20 @@ public class AppActivity extends ListActivity implements FrameUpdateWatcher {
                 }
                 return 0;
             });
-            CachedAppInfo info = new AppInfoCache(getPackageManager()).get(uid);
+            setTitle(userStat.user);
+            CachedAppInfo info = binder.getCache().get(uid);
             if (info != null) {
-                setTitle(info.label);
                 imageView.setImageDrawable(info.icon);
                 textView.setText(info.label);
-                textHint.setHint(info.packageName);
-                killButton.setVisibility(View.VISIBLE);
+                textHint.setHint(String.format(Locale.getDefault(), statusFormat,
+                        NativeProcess.formatTime(userStat.time),
+                        userStat.cpu,
+                        NativeProcess.formatSize(userStat.resident)));
+                // killButton.setVisibility(View.VISIBLE);
             } else {
-                setTitle(userStat.user);
                 imageView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
-                textView.setText(userStat.user);
-                textHint.setHint(String.format(Locale.getDefault(), getString(R.string.status_format),
+                textView.setText(String.format(Locale.getDefault(), uidFormat, userStat.uid));
+                textHint.setHint(String.format(Locale.getDefault(), statusFormat,
                         NativeProcess.formatTime(userStat.time),
                         userStat.cpu,
                         NativeProcess.formatSize(userStat.resident)));

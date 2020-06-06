@@ -40,7 +40,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textView"
             android:layout_alignStart="@+id/textView"
-            android:layout_toStartOf="@id/killButton" />
+            android:layout_toStartOf="@id/killButton"
+            android:fontFamily="monospace" />
 
         <Button
             android:id="@+id/killButton"

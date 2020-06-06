@@ -39,7 +39,7 @@ void print_list(DIR *procdir) {
 }
 
 void init() {
-  const time_t interval = 5;
+  const time_t interval = 2;
   timer_t timer_id;
   signal(SIGALRM, &signal_handler);
   timer_create(CLOCK_MONOTONIC, NULL, &timer_id);

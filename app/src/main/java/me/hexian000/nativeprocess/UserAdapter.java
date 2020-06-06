@@ -19,14 +19,15 @@ import java.util.List;
 import java.util.Locale;
 
 public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
+    private final int textViewResourceId;
     private final String statusFormat, uidFormat;
     private final AppInfoCache cache;
     private LayoutInflater layoutInflater;
     private Drawable defaultIcon;
 
-    UserAdapter(Activity activity, int textViewResourceId,
-                List<Frame.UserStat> processList) {
+    UserAdapter(Activity activity, int textViewResourceId, List<Frame.UserStat> processList) {
         super(activity, textViewResourceId, processList);
+        this.textViewResourceId = textViewResourceId;
         cache = ((MainActivity) activity).getCache();
         layoutInflater = activity.getLayoutInflater();
         defaultIcon = activity.getDrawable(R.mipmap.ic_launcher);
@@ -34,37 +35,41 @@ public class UserAdapter extends ArrayAdapter<Frame.UserStat> {
         uidFormat = activity.getString(R.string.uid_format);
     }
 
+    private void prepareView(@NonNull final View view, @NonNull final Frame.UserStat info) {
+        final TextView userView = view.findViewById(R.id.user);
+        final TextView processView = view.findViewById(R.id.process);
+        final TextView statusView = view.findViewById(R.id.status);
+        final ImageView iconView = view.findViewById(R.id.app_icon);
+
+        CachedAppInfo app = cache.get(info.uid);
+
+        if (app != null) {
+            userView.setText(app.label);
+            processView.setText(app.packageName);
+            iconView.setImageDrawable(app.icon);
+        } else {
+            userView.setText(info.user);
+            processView.setText(String.format(Locale.getDefault(), uidFormat, info.uid));
+            iconView.setImageDrawable(defaultIcon);
+        }
+        statusView.setText(String.format(Locale.getDefault(), statusFormat,
+                NativeProcess.formatTime(info.time),
+                info.cpu,
+                NativeProcess.formatSize(info.resident)));
+    }
+
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View view = convertView;
         if (null == view) {
-            view = layoutInflater.inflate(R.layout.user_list_row, parent, false);
+            view = layoutInflater.inflate(textViewResourceId, parent, false);
         }
 
         if (position < getCount()) {
             Frame.UserStat info = getItem(position);
             if (null != info) {
-                TextView userView = view.findViewById(R.id.user);
-                TextView processView = view.findViewById(R.id.process);
-                TextView statusView = view.findViewById(R.id.status);
-                ImageView iconView = view.findViewById(R.id.app_icon);
-
-                CachedAppInfo app = cache.get(info.uid);
-
-                if (app != null) {
-                    userView.setText(app.label);
-                    processView.setText(app.packageName);
-                    iconView.setImageDrawable(app.icon);
-                } else {
-                    userView.setText(info.user);
-                    processView.setText(String.format(Locale.getDefault(), uidFormat, info.uid));
-                    iconView.setImageDrawable(defaultIcon);
-                }
-                statusView.setText(String.format(Locale.getDefault(), statusFormat,
-                        NativeProcess.formatTime(info.time),
-                        info.cpu,
-                        NativeProcess.formatSize(info.resident)));
+                prepareView(view, info);
             }
         }
         return view;

@@ -5,16 +5,21 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import static me.hexian000.nativeprocess.NativeProcess.TAG;
 
 public class DaemonService extends Service implements Runnable {
     private Daemon daemon;
     private Binder mBinder;
-    private FrameUpdateWatcher watcher;
+    private final Set<FrameUpdateWatcher> watchers = new HashSet<>();
+    private AppInfoCache cache;
     private Frame frame;
     private long clock_tick;
 
@@ -23,6 +28,14 @@ public class DaemonService extends Service implements Runnable {
         if (daemon != null) {
             daemon.close();
             daemon = null;
+        }
+    }
+
+    private void callWatchers() {
+        synchronized (watchers) {
+            for (FrameUpdateWatcher watcher : watchers) {
+                watcher.OnFrameUpdate(frame);
+            }
         }
     }
 
@@ -38,17 +51,14 @@ public class DaemonService extends Service implements Runnable {
                 }
                 if (line.startsWith("END")) {
                     sample.freeze();
-                    final FrameUpdateWatcher watcher = this.watcher;
-                    if (watcher != null) {
-                        final Frame frame = new Frame();
-                        if (last == null) {
-                            frame.fromSample(clock_tick, sample);
-                        } else {
-                            frame.fromSamples(clock_tick, last, sample);
-                        }
-                        watcher.OnFrameUpdate(frame);
-                        this.frame = frame;
+                    final Frame frame = new Frame();
+                    if (last == null) {
+                        frame.fromSample(clock_tick, sample);
+                    } else {
+                        frame.fromSamples(clock_tick, last, sample);
                     }
+                    this.frame = frame;
+                    callWatchers();
                     last = sample;
                     sample = new ProcSample();
                     continue;
@@ -61,14 +71,26 @@ public class DaemonService extends Service implements Runnable {
 
     public class Binder extends android.os.Binder {
         public void watch(FrameUpdateWatcher watcher) {
-            DaemonService.this.watcher = watcher;
+            synchronized (watchers) {
+                watchers.add(watcher);
+            }
             if (frame != null) {
                 watcher.OnFrameUpdate(frame);
             }
         }
 
-        public void unwatch() {
-            DaemonService.this.watcher = null;
+        public void unwatch(FrameUpdateWatcher watcher) {
+            synchronized (watchers) {
+                watchers.remove(watcher);
+            }
+        }
+
+        @NonNull
+        public AppInfoCache getCache() {
+            if (cache == null) {
+                cache = new AppInfoCache(getPackageManager());
+            }
+            return cache;
         }
     }
 
@@ -86,6 +108,4 @@ public class DaemonService extends Service implements Runnable {
         }
         return mBinder;
     }
-
-
 }

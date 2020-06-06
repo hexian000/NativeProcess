@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
+
 import me.hexian000.nativeprocess.api.AppInfoCache;
 import me.hexian000.nativeprocess.api.DaemonService;
 import me.hexian000.nativeprocess.api.Frame;
@@ -31,18 +33,16 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
     private int sort;
     private ServiceConnection mConnection;
     private DaemonService.Binder binder;
-    private AppInfoCache cache;
 
+    @NonNull
     public AppInfoCache getCache() {
-        return cache;
+        return binder.getCache();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        cache = new AppInfoCache(getPackageManager());
 
         listLoading = findViewById(R.id.ListLoading);
         processList = new ArrayList<>();
@@ -63,18 +63,18 @@ public class MainActivity extends Activity implements FrameUpdateWatcher {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         if (binder != null) {
-            binder.unwatch();
+            binder.unwatch(this);
             binder = null;
         }
         unbindService(mConnection);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         firstRefresh = true;
         listLoading.setVisibility(View.VISIBLE);
         mConnection = new ServiceConnection() {
