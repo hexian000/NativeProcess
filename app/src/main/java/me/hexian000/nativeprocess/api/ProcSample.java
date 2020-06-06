@@ -23,7 +23,6 @@ public final class ProcSample {
     public Map<Integer, ProcStat> data = new HashMap<>();
 
     public void add(final String line, final String cmdline) {
-        Log.d(TAG, "line: \"" + line + "\"");
         String[] tokens = line.split(",", 6);
         if (tokens.length != 6) {
             return;
