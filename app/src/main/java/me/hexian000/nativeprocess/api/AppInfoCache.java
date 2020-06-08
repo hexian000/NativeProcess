@@ -3,9 +3,10 @@ package me.hexian000.nativeprocess.api;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.List;
+import static me.hexian000.nativeprocess.NativeProcess.TAG;
 
 public class AppInfoCache {
     private PackageManager pm;
@@ -18,7 +19,8 @@ public class AppInfoCache {
 
     private CachedAppInfo loadInfo(int uid) {
         String[] packages = pm.getPackagesForUid(uid);
-        if (packages == null) {
+        if (packages == null || packages.length == 0) {
+            Log.d(TAG, "loadInfo failed for uid: " + uid);
             return null;
         }
         StringBuilder label = null;
@@ -34,7 +36,8 @@ public class AppInfoCache {
                 if (icon == null) {
                     icon = app.loadIcon(pm);
                 }
-            } catch (PackageManager.NameNotFoundException ignored) {
+            } catch (PackageManager.NameNotFoundException ex) {
+                Log.e(TAG, "loadInfo uid: " + uid, ex);
             }
         }
         if (label == null) {
